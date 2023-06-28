@@ -28,21 +28,7 @@ def InsertClause(clausula):
         miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,clausula(3),clausula(0),clausula(1),clausula(2),'TRANVÍA','CAF',NULL,NULL,1)")
         miConexion.commit()
 
-
-       miCursor.execute('''
-            CREATE TABLE CBC (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            FAM_REQ VARCHAR(20),
-            DESC_REQ VARCHAR(4000),
-            RESP VARCHAR(1),
-            COMMENT VARCHAR(4000),
-            VEHICULO VARCHAR(20),
-            CLIENTE VARCHAR(20),
-            FECHA_ACT VARCHAR(20),
-            COMENT_INT VARCHAR(4000),
-            VERSION INTEGER)''')
-        
-
+      
 
 def EvaluaRepetida():
     pass
