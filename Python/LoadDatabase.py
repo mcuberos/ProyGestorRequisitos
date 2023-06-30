@@ -15,22 +15,26 @@ from tkinter.filedialog import askopenfilename
 def InsertClause(clausula):
     PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
     miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
+    #miConexion=sqlite3.connect("C:/Users/mcuberos/OneDrive - Internacional Hispacold/Documentos/git/ProyGestorRequisitos/Python/BBDD_CBCs")
     miCursor=miConexion.cursor()
-    miCursor.execute("SELECT * FROM CBCs")
+    miCursor.execute("SELECT * FROM REQUISITOS")
     listadoRequisitos=miCursor.fetchall()
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
-        if clausula[0]==requisito( [1]):
+        #CheckClause(clausula[0],requisito[2]). La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
+        if clausula[0]==requisito[2]:
             ExisteClausula=TRUE
         
     if ExisteClausula==FALSE:
-        miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,clausula(3),clausula(0),clausula(1),clausula(2),'TRANVÍA','CAF',NULL,NULL,1)")
+        #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
+        miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL, ?, ?, ?, ?,'TRANVÍA','CAF',NULL,NULL,1)",(clausula[3],clausula[0],clausula[1],clausula[2]))
         miConexion.commit()
 
       
 
-def EvaluaRepetida():
+def CheckClause(newClause,requirement):
+    #ESTA FUNCIÓN COMPRUEBA SI UN REQUISITO NUEVO ES IGUAL A OTRO GUARDADO EN BBDD. Debe devolver un %de coincidencia entre los dos requisitos
     pass
     
 
@@ -40,10 +44,10 @@ PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbd
 
 fileName=askopenfilename()
 filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC")
-colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS") #para convertirlo a número: ord(colClause.lower())-96
-colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS (C/NC/NA)")
-colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS")
-colFamReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LA FAMILIA DEL REQUISITO")
+colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...)") #para convertir la columna (letra) a número: ord(colClause.lower())-96
+colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...)")
+colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...)")
+colFamReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LA FAMILIA DEL REQUISITO (A,B,C,D,...)")
 
 
 df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1)#, on_bad_lines='skip')
@@ -65,11 +69,12 @@ for etiqueta, contenido in df.items():
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause
 for kk in range(len(df)):
-    #defino la variable clausula como una tupla que contiene la propia clausula, la respuesta, comentarios y req. familia
+    #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
     clausula=(df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
     #clausula=df.iloc[kk][(ord(colClause.lower())-97)]
     print(df.iloc[kk][(ord(colClause.lower())-97)])
-    input("introduzca una tecla para continuar")
+    InsertClause(clausula)
+
 
 
 

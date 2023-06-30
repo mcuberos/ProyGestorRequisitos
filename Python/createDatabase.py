@@ -13,7 +13,7 @@ def conexionBBDD():
 
     try:
         miCursor.execute('''
-            CREATE TABLE CBC (
+            CREATE TABLE REQUISITOS (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
             FAM_REQ VARCHAR(20),
             DESC_REQ VARCHAR(4000),
