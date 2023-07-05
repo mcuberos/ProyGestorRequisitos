@@ -6,6 +6,8 @@ if action=="C":
 
 elif action=="L":
     import LoadDatabase
-
+    
 else:
     messagebox.showinfo("WARNING!","AN INVALID OPTION HAS BEEN SELECTED. PLEASE RUN THE PROGRAM AGAIN.")
+
+input("PRESIONE ENTER PARA SALIR")
