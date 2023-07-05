@@ -1,16 +1,20 @@
 '''
-ESTA FUNCIÓN DEBE RECIBIR POR PARÁMETROS EL FICHERO EXCEL A CARGAR EN LA BASE DE DATOS, además 
+ESTA FUNCIÓN DEBE RECIBIR POR PARÁMETROS EL FICHERO EXCEL A CARGAR EN LA BASE DE DATOS, ADEMÁS DE LAS COLUMNAS Y FILAS DE REFERENCIA 
 LA FUNCIÓN DEBE RECORRER DICHO EXCEL E INSERTAR EN BASE DE DATOS TODAS LAS CLÁUSULAS COMPROBANDO SI LA CLÁUSULA YA ESTÁ EN BBDD
 
 #Ejemplo: python LoadDatabase.py 'C:/Users/mcuberos/Desktop/AppGestorRequisitos_old/Python/D0000016800_EEFAE SALOON HVAC P2_Ed-HC_230517.xlsx' '7' 'G'''
 
 import os
 import sqlite3
+import re
 import pandas as pd
 from tkinter import messagebox
 import sys
 from tkinter import *
+from tkinter import filedialog
 from tkinter.filedialog import askopenfilename 
+
+
 
 def InsertClause(clausula):
     PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
@@ -20,27 +24,110 @@ def InsertClause(clausula):
     miCursor.execute("SELECT * FROM REQUISITOS")
     listadoRequisitos=miCursor.fetchall()
     ExisteClausula=FALSE
+    print(clausula[0])
 
     for requisito in listadoRequisitos:
-        #CheckClause(clausula[0],requisito[2]). La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
-        if clausula[0]==requisito[2]:
+        print(requisito[2])
+        accuracy=CheckClause(clausula[0],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
+        if accuracy>80:
+      #  if clausula[0]==requisito[2]:
             ExisteClausula=TRUE
+            print("La cláusula ya existe en bbdd con el id ",requisito[0], "con un porcentaje de coincidencia del ",accuracy," por ciento")
+            break
         
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
         miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL, ?, ?, ?, ?,'TRANVÍA','CAF',NULL,NULL,1)",(clausula[3],clausula[0],clausula[1],clausula[2]))
         miConexion.commit()
 
-      
-
 def CheckClause(newClause,requirement):
     #ESTA FUNCIÓN COMPRUEBA SI UN REQUISITO NUEVO ES IGUAL A OTRO GUARDADO EN BBDD. Debe devolver un %de coincidencia entre los dos requisitos
-    pass
+    if newClause==requirement:
+        accuracy=100
+    else:
+        accuracy=0
+        longParcial=int(len(newClause)/15)
+        for aux in range(15):
+            cadena=newClause[aux*longParcial:longParcial*(aux+1)]
+            if re.search(re.escape(cadena),requirement):
+                accuracy=accuracy+100/15
+                    
+    return accuracy
+
+
+'''CREO UNA PANTALLA PARA SELECCIONAR LOS PARÁMETROS
+fileName=""
+filaHeader=""
+colClause=""
+colResp=""
+colComments=""
+colFamReq=""
+
+
+raiz = Tk()
+
+raiz.title("SELECCIONE EL CBC")
+miFrame2=Frame(raiz,width=1200,height=60)
+miFrame=Frame(raiz, width=1200,height=600)
+miFrame.pack()
+
+def abreFichero():
+    fichero=filedialog.askopenfile(title="Abrir",filetypes=(("Ficheros de Excel","*.xlsx"),("Ficheros de Texto","*.txt"),("Todos los ficheros","*.*")))
+    print (fichero.name)
+    fileName=fichero.name
+    print (fileName)
     
+Button(raiz,text="Abrir Fichero", command=abreFichero).pack()
 
 
-#fileName=os.path.basename(__file__)
-PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
+cuadroCabecera=Entry(miFrame)
+cuadroCabecera.grid(row=1,column=1,padx=10,pady=10)
+CabeceraLabel = Label(miFrame,text="FILA DE LA CABECERA:")
+CabeceraLabel.grid(row=1,column=0,sticky="w",padx=10,pady=10)
+
+cuadroReq=Entry(miFrame)
+cuadroReq.grid(row=2,column=1,padx=10,pady=10)
+ReqLabel = Label(miFrame,text="COLUMNA DESCR. REQUISITO:")
+ReqLabel.grid(row=2,column=0,sticky="w",padx=10,pady=10)
+
+cuadroRespuesta=Entry(miFrame)
+cuadroRespuesta.grid(row=3,column=1,padx=10,pady=10)
+RespuestaLabel = Label(miFrame,text="COLUMNA RESPUESTA REQUISITO:")
+RespuestaLabel.grid(row=3,column=0,sticky="w",padx=10,pady=10)
+
+ComentariosLabel = Label(miFrame,text="COLUMNA COMENTARIOS:")
+ComentariosLabel.grid(row=4,column=0,sticky="w",padx=10,pady=10)
+CuadroComentarios=Entry(miFrame)
+CuadroComentarios.grid(row=4,column=1,padx=10,pady=10)
+
+FamReqLabel = Label(miFrame,text="COLUMNA FAMILIA REQUISITOS:")
+FamReqLabel.grid(row=5,column=0,sticky="w",padx=10,pady=10)
+CuadroFamReq=Entry(miFrame)
+CuadroFamReq.grid(row=5,column=1,padx=10,pady=10)
+
+def codigoBoton():
+    print("valor de filename")
+    print(fileName)
+    print("valor de fila cabecera")
+    print(filaHeader)
+   
+    filaHeader=cuadroCabecera
+    colClause=cuadroReq
+    colResp=cuadroRespuesta
+    colComments=CuadroComentarios
+    colFamReq=CuadroFamReq
+    print("valor de filename")
+    print(fileName)
+    print("valor de fila cabecera")
+    print(filaHeader)
+
+botonEnvio=Button(raiz,text="ENVIAR",command=codigoBoton) #indicamos que al pulsar al botón llame a la funcion codigoBoton
+botonEnvio.pack()
+
+raiz.mainloop()
+
+'''
+
 
 fileName=askopenfilename()
 filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC")
@@ -72,34 +159,5 @@ for kk in range(len(df)):
     #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
     clausula=(df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
     #clausula=df.iloc[kk][(ord(colClause.lower())-97)]
-    print(df.iloc[kk][(ord(colClause.lower())-97)])
+    #print(df.iloc[kk][(ord(colClause.lower())-97)])
     InsertClause(clausula)
-
-
-
-
-
-
-
-
-
-
-'''
-for elem in df[0,:]:
-    print(elem)
-
-for elemento in range(len(df)):
-    print(df.iloc[elemento][int(colClause)-1])
-
-root=Tk()
-root.title("CARGA BASE DE DATOS")
-print(len(sys.argv))
-print(sys.argv[0])
-miFrame=Frame(root, width=600, height=600).pack()
-
-
-miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
-miCursor=miConexion.cursor()
-
-
-root.mainloop()'''
