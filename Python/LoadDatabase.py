@@ -28,18 +28,18 @@ def InsertClause(clausula):
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
-        accuracy=CheckClause(clausula[0],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
+        accuracy=CheckClause(clausula[1],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
         if accuracy>80:
       #  if clausula[0]==requisito[2]:
             ExisteClausula=TRUE
-            print("La cláusula ya existe en bbdd con el id ",requisito[0], "con un porcentaje de coincidencia del ",accuracy," por ciento")
+            print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0], "con un porcentaje de coincidencia del ",accuracy," por ciento")
             break
         
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
-        miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL, ?, ?, ?, ?,'TRANVÍA','CAF',NULL,NULL,1)",(clausula[3],clausula[0],clausula[1],clausula[2]))
+        miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL, ?, ?, ?, ?,'TRANVÍA','CAF',NULL,NULL,1)",(clausula[4],clausula[1],clausula[2],clausula[3]))
         miConexion.commit()
-
+        
 def CheckClause(newClause,requirement):
     """ESTA FUNCIÓN COMPRUEBA SI UN REQUISITO NUEVO ES IGUAL A OTRO GUARDADO EN BBDD.
         DEVUELVE UN % DE COINDICENCIA ENTRE LOS DOS REQUISITOS"""
@@ -47,11 +47,14 @@ def CheckClause(newClause,requirement):
         accuracy=100
     else:
         accuracy=0
-        longParcial=int(len(newClause)/15)
-        for aux in range(15):
+        longParcial=30
+        numTramos=int(len(newClause)/longParcial)
+        if numTramos==0: numTramos=1
+        #longParcial=int(len(newClause)/15)
+        for aux in range(numTramos):
             cadena=newClause[aux*longParcial:longParcial*(aux+1)]
             if re.search(re.escape(cadena),requirement):
-                accuracy=accuracy+100/15
+                accuracy=accuracy+100/numTramos
                     
     return accuracy
 
@@ -137,12 +140,22 @@ colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUI
 colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
 colFamReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LA FAMILIA DEL REQUISITO (A,B,C,D,...) ")
 colObjectType=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN EL TIPO DE LA LÍNEA (OBJECT TYPE: REQUISITO, TÍTULO, INFO, ...) ")
-
+'''
+filaHeader="7"
+colClause="g"
+colResp="Q"
+colComments="r"
+colFamReq="a"
+colObjectType="d"
+'''
 
 df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1)#, on_bad_lines='skip')
 #EL DATAFRAME CONSIDERA LOS "NA" COMO NaN, ASÍ QUE TRATO LOS NA DE LA COLUMNA RESPUESTA PARA QUE LOS GUARDE CORRECTAMENTE CON LA FUNCIÓN fillna
 TituloColumnaRespuesta=df.columns[(ord(colResp.lower())-97)]
 df[TituloColumnaRespuesta]=df[TituloColumnaRespuesta].fillna("NA")
+TituloColumnaClausula=df.columns[(ord(colClause.lower())-97)]
+df[TituloColumnaClausula]=df[TituloColumnaClausula].fillna("NA")
+
 
 #excel="C:\Users\mcuberos\Desktop\AppGestorRequisitos_old\Python\D0000016800_EEFAE SALOON HVAC P2_Ed-HC_230517.xlsx"
 
@@ -162,7 +175,7 @@ for etiqueta, contenido in df.items():
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause, OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS 
 for kk in range(len(df)):
-    if (df.iloc[kk][(ord(colObjectType.lower())-97)])!="TIT":
+    if (df.iloc[kk][(ord(colObjectType.lower())-97)]!="TIT" and df.iloc[kk][(ord(colClause.lower())-97)]!="NA" and len(df.iloc[kk][(ord(colClause.lower())-97)])>15):
         #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
-        clausula=(df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
+        clausula=(kk,df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
         InsertClause(clausula)
