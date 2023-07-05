@@ -28,7 +28,6 @@ def InsertClause(clausula):
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
-        print(requisito[2])
         accuracy=CheckClause(clausula[0],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
         if accuracy>80:
       #  if clausula[0]==requisito[2]:
@@ -132,14 +131,19 @@ raiz.mainloop()
 
 
 fileName=askopenfilename()
-filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC")
-colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...)") #para convertir la columna (letra) a número: ord(colClause.lower())-96
-colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...)")
-colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...)")
-colFamReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LA FAMILIA DEL REQUISITO (A,B,C,D,...)")
+filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC ")
+colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...) ") #para convertir la columna (letra) a número: ord(colClause.lower())-96
+colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...) ")
+colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
+colFamReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LA FAMILIA DEL REQUISITO (A,B,C,D,...) ")
+colObjectType=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN EL TIPO DE LA LÍNEA (OBJECT TYPE: REQUISITO, TÍTULO, INFO, ...) ")
 
 
 df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1)#, on_bad_lines='skip')
+#EL DATAFRAME CONSIDERA LOS "NA" COMO NaN, ASÍ QUE TRATO LOS NA DE LA COLUMNA RESPUESTA PARA QUE LOS GUARDE CORRECTAMENTE CON LA FUNCIÓN fillna
+TituloColumnaRespuesta=df.columns[(ord(colResp.lower())-97)]
+df[TituloColumnaRespuesta]=df[TituloColumnaRespuesta].fillna("NA")
+
 #excel="C:\Users\mcuberos\Desktop\AppGestorRequisitos_old\Python\D0000016800_EEFAE SALOON HVAC P2_Ed-HC_230517.xlsx"
 
 
@@ -156,8 +160,9 @@ for etiqueta, contenido in df.items():
            # print('Contenido: ', contenido, sep='\n')
 '''
 
-#RECORRO EL DATAFRAME EN LA COLUMNA colClause
+#RECORRO EL DATAFRAME EN LA COLUMNA colClause, OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS 
 for kk in range(len(df)):
-    #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
-    clausula=(df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
-    InsertClause(clausula)
+    if (df.iloc[kk][(ord(colObjectType.lower())-97)])!="TIT":
+        #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
+        clausula=(df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
+        InsertClause(clausula)
