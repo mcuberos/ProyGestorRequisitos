@@ -17,6 +17,8 @@ from tkinter.filedialog import askopenfilename
 
 
 def InsertClause(clausula):
+    """InsertClause INTENTA INSERTAR UNA CLÁUSULA EN BBDD.
+    ANTES DE INSERTARLA DEBE COMBROBAR SI LA CLÁUSULA YA EXISTE LLAMANDO A LA FUNCIÓN CHECKCLAUSE"""
     PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
     miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
     #miConexion=sqlite3.connect("C:/Users/mcuberos/OneDrive - Internacional Hispacold/Documentos/git/ProyGestorRequisitos/Python/BBDD_CBCs")
@@ -24,7 +26,6 @@ def InsertClause(clausula):
     miCursor.execute("SELECT * FROM REQUISITOS")
     listadoRequisitos=miCursor.fetchall()
     ExisteClausula=FALSE
-    print(clausula[0])
 
     for requisito in listadoRequisitos:
         print(requisito[2])
@@ -41,7 +42,8 @@ def InsertClause(clausula):
         miConexion.commit()
 
 def CheckClause(newClause,requirement):
-    #ESTA FUNCIÓN COMPRUEBA SI UN REQUISITO NUEVO ES IGUAL A OTRO GUARDADO EN BBDD. Debe devolver un %de coincidencia entre los dos requisitos
+    """ESTA FUNCIÓN COMPRUEBA SI UN REQUISITO NUEVO ES IGUAL A OTRO GUARDADO EN BBDD.
+        DEVUELVE UN % DE COINDICENCIA ENTRE LOS DOS REQUISITOS"""
     if newClause==requirement:
         accuracy=100
     else:
@@ -158,6 +160,4 @@ for etiqueta, contenido in df.items():
 for kk in range(len(df)):
     #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
     clausula=(df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colFamReq.lower())-97)])
-    #clausula=df.iloc[kk][(ord(colClause.lower())-97)]
-    #print(df.iloc[kk][(ord(colClause.lower())-97)])
     InsertClause(clausula)
