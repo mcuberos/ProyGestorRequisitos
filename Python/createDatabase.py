@@ -15,7 +15,7 @@ def conexionBBDD():
         miCursor.execute('''
             CREATE TABLE REQUISITOS (
             ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            FAM_REQ VARCHAR(20),
+            ID_REQ VARCHAR(20),
             DESC_REQ VARCHAR(4000),
             RESP VARCHAR(1),
             COMMENT VARCHAR(4000),
