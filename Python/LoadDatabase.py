@@ -13,12 +13,22 @@ import sys
 from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename 
+from pandas import ExcelWriter
 
-
+dftemp = pd.DataFrame({'Id_Req': [],
+                   'Desc_Req': [],
+                   'ID_Req_BBDD': [],
+                   'Descr_Req_BBDD':[],
+                   '%Coincidencia':[],
+                   'Resp_BBDD':[],
+                   'Coment_BBDD':[],
+                   'Nueva_Respuesta':[],
+                   'Nuevos_comentarios':[]})
 
 def InsertClause(clausula):
     """InsertClause INTENTA INSERTAR UNA CLÁUSULA EN BBDD.
     ANTES DE INSERTARLA DEBE COMBROBAR SI LA CLÁUSULA YA EXISTE LLAMANDO A LA FUNCIÓN CHECKCLAUSE"""
+    global dftemp
     PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
     miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
     #miConexion=sqlite3.connect("C:/Users/mcuberos/OneDrive - Internacional Hispacold/Documentos/git/ProyGestorRequisitos/Python/BBDD_CBCs")
@@ -28,6 +38,9 @@ def InsertClause(clausula):
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
+        if clausula[4]=="EFB-RS-703" and requisito[1]=="EFB-RS-707":
+            print("revisar")
+
         if clausula[4]==requisito[1]:
             print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
 
@@ -37,13 +50,18 @@ def InsertClause(clausula):
         #  if clausula[0]==requisito[2]:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"",""], index=dftemp.columns)
+                dftemp = dftemp._append(nueva_fila, ignore_index=True)
                 break
         
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
         miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL, ?, ?, ?, ?,'TRANVÍA','CAF',NULL,NULL,1)",(clausula[4],clausula[1],clausula[2],clausula[3]))
         miConexion.commit()
-        
+    
+    return dftemp
+
+
 def CheckClause(newClause,requirement):
     """ESTA FUNCIÓN COMPRUEBA SI UN REQUISITO NUEVO ES IGUAL A OTRO GUARDADO EN BBDD.
         DEVUELVE UN % DE COINDICENCIA ENTRE LOS DOS REQUISITOS"""
@@ -60,6 +78,8 @@ def CheckClause(newClause,requirement):
                 accuracy=accuracy+99/numTramos
                     
     return accuracy
+
+
 
 
 
@@ -106,6 +126,13 @@ for kk in range(len(df)):
         clausula=(kk,df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colIdReq.lower())-97)])
         InsertClause(clausula)
 
+
+Ruta=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
+excelTemp=(Ruta + "/ExcelTemp.xlsx")
+
+writer = ExcelWriter(excelTemp)
+dftemp.to_excel(writer, 'Hoja de datos', index=False)
+writer.close()
 
 
 
