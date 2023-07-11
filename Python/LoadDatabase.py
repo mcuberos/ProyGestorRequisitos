@@ -38,9 +38,6 @@ def InsertClause(clausula):
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
-        if clausula[4]=="EFB-RS-703" and requisito[1]=="EFB-RS-707":
-            print("revisar")
-
         if clausula[4]==requisito[1]:
             print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
 
@@ -78,9 +75,6 @@ def CheckClause(newClause,requirement):
                 accuracy=accuracy+99/numTramos
                     
     return accuracy
-
-
-
 
 
 fileName=askopenfilename()
@@ -127,85 +121,15 @@ for kk in range(len(df)):
         InsertClause(clausula)
 
 
-Ruta=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
-excelTemp=(Ruta + "/ExcelTemp.xlsx")
-
-writer = ExcelWriter(excelTemp)
-dftemp.to_excel(writer, 'Hoja de datos', index=False)
-writer.close()
-
-
-
-'''CREO UNA PANTALLA PARA SELECCIONAR LOS PARÁMETROS
-fileName=""
-filaHeader=""
-colClause=""
-colResp=""
-colComments=""
-colFamReq=""
-
-
-raiz = Tk()
-
-raiz.title("SELECCIONE EL CBC")
-miFrame2=Frame(raiz,width=1200,height=60)
-miFrame=Frame(raiz, width=1200,height=600)
-miFrame.pack()
-
-def abreFichero():
-    fichero=filedialog.askopenfile(title="Abrir",filetypes=(("Ficheros de Excel","*.xlsx"),("Ficheros de Texto","*.txt"),("Todos los ficheros","*.*")))
-    print (fichero.name)
-    fileName=fichero.name
-    print (fileName)
+if len(dftemp)>0:
+    Ruta=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
+    excelTemp=(Ruta + "/ExcelTemp.xlsx")
     
-Button(raiz,text="Abrir Fichero", command=abreFichero).pack()
+    writer = ExcelWriter(excelTemp)
+    dftemp.to_excel(writer, 'Requierements Temp', index=False)
+    writer.close()
+
+    messagebox.showinfo("EXCEL TEMPORAL CREADO","SE HA CREADO UN EXCEL TEMPORAL CON LAS CLÁUSULAS CON COINCIDENCIAS EN LA RUTA " + Ruta)   
 
 
-cuadroCabecera=Entry(miFrame)
-cuadroCabecera.grid(row=1,column=1,padx=10,pady=10)
-CabeceraLabel = Label(miFrame,text="FILA DE LA CABECERA:")
-CabeceraLabel.grid(row=1,column=0,sticky="w",padx=10,pady=10)
-
-cuadroReq=Entry(miFrame)
-cuadroReq.grid(row=2,column=1,padx=10,pady=10)
-ReqLabel = Label(miFrame,text="COLUMNA DESCR. REQUISITO:")
-ReqLabel.grid(row=2,column=0,sticky="w",padx=10,pady=10)
-
-cuadroRespuesta=Entry(miFrame)
-cuadroRespuesta.grid(row=3,column=1,padx=10,pady=10)
-RespuestaLabel = Label(miFrame,text="COLUMNA RESPUESTA REQUISITO:")
-RespuestaLabel.grid(row=3,column=0,sticky="w",padx=10,pady=10)
-
-ComentariosLabel = Label(miFrame,text="COLUMNA COMENTARIOS:")
-ComentariosLabel.grid(row=4,column=0,sticky="w",padx=10,pady=10)
-CuadroComentarios=Entry(miFrame)
-CuadroComentarios.grid(row=4,column=1,padx=10,pady=10)
-
-FamReqLabel = Label(miFrame,text="COLUMNA FAMILIA REQUISITOS:")
-FamReqLabel.grid(row=5,column=0,sticky="w",padx=10,pady=10)
-CuadroFamReq=Entry(miFrame)
-CuadroFamReq.grid(row=5,column=1,padx=10,pady=10)
-
-def codigoBoton():
-    print("valor de filename")
-    print(fileName)
-    print("valor de fila cabecera")
-    print(filaHeader)
-   
-    filaHeader=cuadroCabecera
-    colClause=cuadroReq
-    colResp=cuadroRespuesta
-    colComments=CuadroComentarios
-    colFamReq=CuadroFamReq
-    print("valor de filename")
-    print(fileName)
-    print("valor de fila cabecera")
-    print(filaHeader)
-
-botonEnvio=Button(raiz,text="ENVIAR",command=codigoBoton) #indicamos que al pulsar al botón llame a la funcion codigoBoton
-botonEnvio.pack()
-
-raiz.mainloop()
-
-'''
-
+messagebox.showinfo("FIN PROCESO","EJECUCIÓN FINALIZADA CON ÉXITO")
