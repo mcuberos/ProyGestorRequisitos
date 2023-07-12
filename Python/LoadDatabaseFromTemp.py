@@ -34,7 +34,6 @@ def InsertClauseFromTemp(clausula):
     miConexion.commit()
 
 fileName=askopenfilename()
-
 df=pd.read_excel(fileName, sheet_name="Requirements Temp",keep_default_na=FALSE)
 
 
@@ -44,6 +43,5 @@ for kk in range(len(df)):
         InsertClauseFromTemp(clausula)
 
 
-messagebox.showinfo("SE HAN INSERTADO LAS CLÁUSULAS EN LA BASE DE DATOS","PROCESO FINALIZADO")
-
+messagebox.showinfo("PROCESO FINALIZADO","SE HAN INSERTADO LAS CLÁUSULAS EN LA BASE DE DATOS")
 
