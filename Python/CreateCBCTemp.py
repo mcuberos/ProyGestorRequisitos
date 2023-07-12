@@ -25,7 +25,7 @@ dftemp = pd.DataFrame({'Id_Req': [],
                    'Nueva_Respuesta':[],
                    'Nuevos_comentarios':[]})
 
-def FillClause(clausula):
+def AddClauseToTemp(clausula):
     """Recorre la bbdd buscando la cláusula para informar el excel original"""
 
     global dftemp
@@ -98,7 +98,7 @@ for kk in range(len(df)):
     if (df.iloc[kk][(ord(colResp.lower())-97)]!="" and len(df.iloc[kk][(ord(colClause.lower())-97)])>5):
         #defino la variable clausula como una tupla que contiene: id_requisito, descripción de la clausula, la respuesta, comentarios
         clausula=(kk,df.iloc[kk][(ord(colIdReq.lower())-97)],df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)])
-        FillClause(clausula)
+        AddClauseToTemp(clausula)
 
 
 if len(dftemp)>0:
