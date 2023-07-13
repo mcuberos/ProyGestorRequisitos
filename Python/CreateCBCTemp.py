@@ -14,6 +14,8 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename 
 from pandas import ExcelWriter
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill, Font
 
 dftemp = pd.DataFrame({'Id_Req': [],
                    'Desc_Req': [],
@@ -36,22 +38,24 @@ def AddClauseToTemp(clausula):
     listadoRequisitos=miCursor.fetchall()
     ExisteClausula=FALSE
     best_accuracy=0
-
     for requisito in listadoRequisitos:
         if clausula[1]==requisito[1] or clausula[2]==requisito[2]:
             #EXISTE LA CLAUSULA TAL CUAL EN BASE DE DATOS. SE DEBE TOMAR ESE VALOR
-           # print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
             ExisteClausula=TRUE
-            nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],100,requisito[3],requisito[4],"",""], index=dftemp.columns)
+            nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],100,requisito[3],requisito[4],requisito[3],requisito[4]], index=dftemp.columns)
             dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
             accuracy=CheckClause(clausula[2],requisito[2])
             if accuracy>best_accuracy:
-                nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"",""], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],requisito[3],requisito[4]], index=dftemp.columns)
                 best_accuracy=accuracy
+                if accuracy>80: #o meto este IF o meto la linea 59, para guardar solo la mejor coincidencia
+                    dftemp = dftemp._append(nueva_fila, ignore_index=True) #SI METO ESTA LÍNEA, VOY A AÑADIR EN EL EXCEL TEMPORAL TODAS LAS COINCIDENCIAS QUE ENCUENTRE PARA LA CLAUSULA CON ACCURACY >80
         
     if ExisteClausula==FALSE:
         #SI NO SE HA ENCONTRADO EXACTAMENTE LA CLAUSULA, AÑADO NUEVA_FILA, QUE ES EL REQUISITO QUE HA ENCONTRADO CON MAYOR ACCURACY.
+        if best_accuracy==0:
+            nueva_fila = pd.Series([clausula[1], clausula[2], "NO HAY COINCIDENCIAS","NO HAY COINCIDENCIAS",accuracy,"NO HAY COINCIDENCIAS","NO HAY COINCIDENCIAS","",""], index=dftemp.columns)
         dftemp = dftemp._append(nueva_fila, ignore_index=True)
     
     return dftemp
@@ -71,33 +75,35 @@ def CheckClause(newClause,requirement):
             cadena=newClause[aux*longParcial:longParcial*(aux+1)]
             if re.search(re.escape(cadena),requirement):
                 accuracy=accuracy+99/numTramos
-                    
-    return accuracy
 
+    return accuracy
 
 fileName=askopenfilename()
 filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC ")
 colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
 colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...) ") #para convertir la columna (letra) a número: ord(colClause.lower())-96
-colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...) ")
-colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
 
-'''
-filaHeader="7"
-colClause="g"
-colResp="Q"
-colComments="r"
-colFamReq="a"
-'''
+#GENERO EL DATAFRAME OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS QUE TIENEN EL FONDO GRIS 
+# PRIMERO, GUARDO EN UNA TUPLA TODAS LAS FILAS DE TÍTULOS  
+book=load_workbook(fileName)
+nombre_hoja="Requirements"
+hoja_excel=book[nombre_hoja]
+fila=int(filaHeader)+1
+celda=hoja_excel[colIdReq+str(fila)]
+filas_titulos=[]
+while celda.value != None:
+    if celda.fill.fgColor.rgb!="00000000" and celda.fill.fgColor.type!="theme": #busco las celdas que tengan relleno distinto de vacío y de blanco
+        filas_titulos.append(fila-1) #guardo fila-1 porque el dataframe trabaja con la fila 0
+    fila+=1
+    celda=hoja_excel["A"+str(fila)]
 
-df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1,keep_default_na=FALSE)
+df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1,skiprows=filas_titulos,keep_default_na=FALSE)
 
-
-#RECORRO EL DATAFRAME EN LA COLUMNA colClause, OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS 
+#RECORRO EL DATAFRAME EN LA COLUMNA colClause 
 for kk in range(len(df)):
-    if (df.iloc[kk][(ord(colResp.lower())-97)]!="" and len(df.iloc[kk][(ord(colClause.lower())-97)])>5):
+    if len(df.iloc[kk][(ord(colClause.lower())-97)])>5:
         #defino la variable clausula como una tupla que contiene: id_requisito, descripción de la clausula, la respuesta, comentarios
-        clausula=(kk,df.iloc[kk][(ord(colIdReq.lower())-97)],df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)])
+        clausula=(kk,df.iloc[kk][(ord(colIdReq.lower())-97)],df.iloc[kk][(ord(colClause.lower())-97)])
         AddClauseToTemp(clausula)
 
 
@@ -108,6 +114,21 @@ if len(dftemp)>0:
     writer = ExcelWriter(excelTemp)
     dftemp.to_excel(writer, 'CBC Temporal', index=False)
     writer.close()
+    #DOY FORMATO A COLUMNAS 
+    libro=load_workbook(excelTemp)
+    hoja=libro.active
+    columnas_a_formatear = ["H","I"]
+    fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+    for col in columnas_a_formatear:
+        for celda in hoja[col]:
+            celda.fill=fill
+    fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
+    font = Font(bold=True)
+    encabezado=hoja[1]
+    for celda in encabezado:
+        celda.fill=fillHeader
+        celda.font=font
+    libro.save(excelTemp)
 
     messagebox.showinfo("EXCEL TEMPORAL CREADO","SE HA CREADO UN EXCEL TEMPORAL CON LAS COINCIDENCIAS DE LAS CLÁUSULAS ENCONTRADAS EN LA RUTA " + Ruta)   
 
