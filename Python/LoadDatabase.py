@@ -39,17 +39,19 @@ def InsertClause(clausula):
 
     for requisito in listadoRequisitos:
         if clausula[4]==requisito[1]:
-            print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
-
+            if clausula[2]==requisito[3] and clausula[3]==requisito[4]:
+                print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
+            else:
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"",""], index=dftemp.columns)
+                dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
             accuracy=CheckClause(clausula[1],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
             if accuracy>95:
-        #  if clausula[0]==requisito[2]:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
                 nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"",""], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
-                break
+
         
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
