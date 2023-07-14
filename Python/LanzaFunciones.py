@@ -14,7 +14,7 @@ elif action=="4":
     import CreateCBCTemp
 
 elif action=="5":
-    import AutoFillCBCTemp
+    import AutoFillFromCBCTemp
 
 else:
     messagebox.showinfo("WARNING!","AN INVALID OPTION HAS BEEN SELECTED. PLEASE RUN THE PROGRAM AGAIN.")
