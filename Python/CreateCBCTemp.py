@@ -29,7 +29,6 @@ dftemp = pd.DataFrame({'Id_Req': [],
 
 def AddClauseToTemp(clausula):
     """Recorre la bbdd buscando la cláusula para informar el excel original"""
-
     global dftemp
     PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
     miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
@@ -56,7 +55,8 @@ def AddClauseToTemp(clausula):
         #SI NO SE HA ENCONTRADO EXACTAMENTE LA CLAUSULA, AÑADO NUEVA_FILA, QUE ES EL REQUISITO QUE HA ENCONTRADO CON MAYOR ACCURACY.
         if best_accuracy==0:
             nueva_fila = pd.Series([clausula[1], clausula[2], "NO HAY COINCIDENCIAS","NO HAY COINCIDENCIAS",accuracy,"NO HAY COINCIDENCIAS","NO HAY COINCIDENCIAS","",""], index=dftemp.columns)
-        dftemp = dftemp._append(nueva_fila, ignore_index=True)
+        if best_accuracy<80:
+            dftemp = dftemp._append(nueva_fila, ignore_index=True)
     
     return dftemp
 
@@ -91,8 +91,11 @@ hoja_excel=book[nombre_hoja]
 fila=int(filaHeader)+1
 celda=hoja_excel[colIdReq+str(fila)]
 filas_titulos=[]
-while celda.value != None:
-    if celda.fill.fgColor.rgb!="00000000" and celda.fill.fgColor.type!="theme": #busco las celdas que tengan relleno distinto de vacío y de blanco
+#TENGO QUE MODIFICAR ALGO EN EL WHILE, PORQUE CUANDO ENCUENTRA UNA LÍNEA EN BLANCO DEJA DE RECORRERLO, Y PUEDE HABERLA. tengo que jugar con el tamaño del df global, contando titulos
+df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1,keep_default_na=FALSE)
+
+for aux in range(len(df)):
+    if (celda.fill.fgColor.rgb!="00000000" and celda.fill.fgColor.type!="theme") or celda.value==None: #busco las celdas que tengan relleno distinto de vacío y de blanco
         filas_titulos.append(fila-1) #guardo fila-1 porque el dataframe trabaja con la fila 0
     fila+=1
     celda=hoja_excel["A"+str(fila)]
@@ -128,6 +131,12 @@ if len(dftemp)>0:
     for celda in encabezado:
         celda.fill=fillHeader
         celda.font=font
+    
+    for i in range(len(hoja["A"])):
+        if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
+            hoja["A"+str(i+1)].fill=fill
+            hoja["A"+str(i+2)].fill=fill
+
     libro.save(excelTemp)
 
     messagebox.showinfo("EXCEL TEMPORAL CREADO","SE HA CREADO UN EXCEL TEMPORAL CON LAS COINCIDENCIAS DE LAS CLÁUSULAS ENCONTRADAS EN LA RUTA " + Ruta)   

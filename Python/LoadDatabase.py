@@ -30,6 +30,7 @@ def InsertClause(clausula):
     ANTES DE INSERTARLA DEBE COMBROBAR SI LA CLÁUSULA YA EXISTE LLAMANDO A LA FUNCIÓN CHECKCLAUSE"""
     global dftemp
     PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
+    #PathName="C:/Users/mcuberos/Desktop/AppGestorRequisitos_old/Python/FICHEROS"
     miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
     #miConexion=sqlite3.connect("C:/Users/mcuberos/OneDrive - Internacional Hispacold/Documentos/git/ProyGestorRequisitos/Python/BBDD_CBCs")
     miCursor=miConexion.cursor()
