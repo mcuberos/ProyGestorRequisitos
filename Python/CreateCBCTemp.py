@@ -82,17 +82,19 @@ fileName=askopenfilename()
 filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC ")
 colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
 colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...) ") #para convertir la columna (letra) a número: ord(colClause.lower())-96
-
+nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements)")
 #GENERO EL DATAFRAME OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS QUE TIENEN EL FONDO GRIS 
 # PRIMERO, GUARDO EN UNA TUPLA TODAS LAS FILAS DE TÍTULOS  
 book=load_workbook(fileName)
-nombre_hoja="Requirements"
+if nombre_hoja=="":
+    nombre_hoja="Requirements"
+
 hoja_excel=book[nombre_hoja]
 fila=int(filaHeader)+1
 celda=hoja_excel[colIdReq+str(fila)]
 filas_titulos=[]
 #TENGO QUE MODIFICAR ALGO EN EL WHILE, PORQUE CUANDO ENCUENTRA UNA LÍNEA EN BLANCO DEJA DE RECORRERLO, Y PUEDE HABERLA. tengo que jugar con el tamaño del df global, contando titulos
-df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1,keep_default_na=FALSE)
+df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_default_na=FALSE)
 
 for aux in range(len(df)):
     if (celda.fill.fgColor.rgb!="00000000" and celda.fill.fgColor.type!="theme") or celda.value==None: #busco las celdas que tengan relleno distinto de vacío y de blanco
@@ -100,7 +102,7 @@ for aux in range(len(df)):
     fila+=1
     celda=hoja_excel["A"+str(fila)]
 
-df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1,skiprows=filas_titulos,keep_default_na=FALSE)
+df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,skiprows=filas_titulos,keep_default_na=FALSE)
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause 
 for kk in range(len(df)):
@@ -131,6 +133,7 @@ if len(dftemp)>0:
     for celda in encabezado:
         celda.fill=fillHeader
         celda.font=font
+
     
     for i in range(len(hoja["A"])):
         if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:

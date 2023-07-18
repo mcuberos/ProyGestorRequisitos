@@ -23,6 +23,9 @@ colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,
 colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...) ") #para convertir la columna (letra) a número: ord(colClause.lower())-96
 colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...) ")
 colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
+nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements)")
+if nombre_hoja=="":
+    nombre_hoja="Requirements"
 
 
 
@@ -45,8 +48,8 @@ if duplicates.any():
     
 
 libro=load_workbook(filename=fileCBC)
-hoja=libro["Requirements"]
-df_cbc=pd.read_excel(fileCBC, sheet_name="Requirements",header=int(filaHeader)-1,keep_default_na=FALSE)
+hoja=libro[nombre_hoja]
+df_cbc=pd.read_excel(fileCBC, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_default_na=FALSE)
 
 #RECORRO EL DATAFRAME DEL EXCEL TEMPORAL. SI ENCUENTRO UNA CLÁUSULA REPETIDA HAY QUE ALERTAR AL USUARIO 
 for kk in range(len(df)):

@@ -86,6 +86,9 @@ colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS
 colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...) ")
 colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
 colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
+nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements)")
+if nombre_hoja=="":
+    nombre_hoja="Requirements"
 '''
 filaHeader="7"
 colClause="g"
@@ -95,7 +98,7 @@ colFamReq="a"
 colObjectType="d"
 '''
 
-df=pd.read_excel(fileName, sheet_name="Requirements",header=int(filaHeader)-1,keep_default_na=FALSE)
+df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_default_na=FALSE)
 #EL DATAFRAME CONSIDERA LOS "NA" COMO NaN, ASÍ QUE TRATO LOS NA DE LA COLUMNA RESPUESTA PARA QUE LOS GUARDE CORRECTAMENTE CON LA FUNCIÓN fillna
 #TituloColumnaRespuesta=df.columns[(ord(colResp.lower())-97)]
 #df[TituloColumnaRespuesta]=df[TituloColumnaRespuesta].fillna("NA")
