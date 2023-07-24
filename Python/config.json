@@ -1,0 +1,15 @@
+{
+  "database": {
+    "host": "MCUBEROS-W10/SQLEXPRESS",
+    "port": 5432,
+    "username": "sa",
+    "password": "Prueb@sManuel23",
+    "database_name": "Requisitos",
+	"table_name": "T_REQUISITOS"
+	},
+  "paths": {
+    "data": "/ruta/de/datos",
+    "logs": "/ruta/de/registros",
+    "temp": "/ruta/temporal"
+  }
+}
