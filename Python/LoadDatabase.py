@@ -14,6 +14,8 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename 
 from pandas import ExcelWriter
+import pyodbc 
+import json
 
 dftemp = pd.DataFrame({'Id_Req': [],
                    'Desc_Req': [],
@@ -105,19 +107,6 @@ df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_
 #TituloColumnaClausula=df.columns[(ord(colClause.lower())-97)]
 #df[TituloColumnaClausula]=df[TituloColumnaClausula].fillna("NA")
 
-
-'''
-#ESTE CÓDIGO RECORRE LA COLUMNA "CLAUSE" Y LA VA IMPRIMIENDO CELDA A CELDA
-for etiqueta, contenido in df.items():
-    if etiqueta=="Clause":
-        j=1
-        for elemento in contenido:
-            print("INICIO ELEMENTO " + str(j))
-            print(elemento)
-            j+=1
-           # print('Nombre de la etiqueta: ', etiqueta)
-           # print('Contenido: ', contenido, sep='\n')
-'''
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause, OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS 
 for kk in range(len(df)):

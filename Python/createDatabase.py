@@ -2,35 +2,62 @@ import os
 import sqlite3
 from tkinter import messagebox
 from tkinter import *
+import pyodbc 
+import json
 
-fileName=os.path.basename(__file__)
+
+def leer_configuracion(fichero_config):
+    with open(fichero_config, 'r') as archivo:
+        configuracion = json.load(archivo)
+    return configuracion
+
 PathName=os.path.dirname(__file__)
+fileConfig=PathName + "/config.json"
 
-def conexionBBDD():
+configuracion=leer_configuracion(fileConfig)
 
-    miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
-    miCursor=miConexion.cursor()
-
-    try:
-        miCursor.execute('''
-            CREATE TABLE REQUISITOS (
-            ID INTEGER PRIMARY KEY AUTOINCREMENT,
-            ID_REQ VARCHAR(20),
-            DESC_REQ VARCHAR(4000),
-            RESP VARCHAR(1),
-            COMMENT VARCHAR(4000),
-            VEHICULO VARCHAR(20),
-            CLIENTE VARCHAR(20),
-            FECHA_ACT VARCHAR(20),
-            COMENT_INT VARCHAR(4000),
-            VERSION INTEGER)''')
-        
-        messagebox.showinfo("BBDD","LA BASE DE DATOS SE HA CREADO CORRECTAMENTE")
-    except:
-        messagebox.showinfo("¡ATENCIÓN!","LA BASE DE DATOS YA EXISTE")
+# Acceder a los datos
+direccion_bd = configuracion['database']['host']
+servidor=direccion_bd.replace("/","\\")
+database=configuracion['database']['database_name']
+username=configuracion['database']['username']
+tablename=configuracion['database']['table_name']
+password='Prueb@sManuel23'
 
 
-conexionBBDD()
+# Cadena de conexión
+connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={database};UID={username};PWD={password}'
+
+# Establecer la conexión
+connection = pyodbc.connect(connection_string)
+
+cursor = connection.cursor()
+
+
+try:
+    cursor.execute('''
+        CREATE TABLE T_REQUISITOS (
+        ID int IDENTITY(1,1) PRIMARY KEY,
+        ID_REQ varchar(20),
+        DESC_REQ varchar(4000),
+        RESP varchar(1),
+        COMMENT varchar(4000),
+        VEHICULO varchar(50),
+        CLIENTE varchar(50),
+        FECHA_ACT varchar(20),
+        COMENT_INT varchar(4000),
+        VERS int,
+        PROYECTO_ORIGEN varchar(50),
+        FICHERO_ORIGEN varchar(100))''')
+    
+    messagebox.showinfo("BBDD","LA BASE DE DATOS SE HA CREADO CORRECTAMENTE")
+except:
+    messagebox.showinfo("¡ATENCIÓN!","LA BASE DE DATOS YA EXISTE")
+
+cursor.close()
+connection.close()
+
+
 
 '''
  CREATE TABLE T_REQUISITOS (
