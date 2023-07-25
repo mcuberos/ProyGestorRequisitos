@@ -48,7 +48,8 @@ try:
         COMENT_INT varchar(4000),
         VERS int,
         PROYECTO_ORIGEN varchar(50),
-        FICHERO_ORIGEN varchar(100))''')
+        FICHERO_ORIGEN varchar(100),
+        ENTREGABLE_CBC varchar(20))''')
     
     messagebox.showinfo("BBDD","LA BASE DE DATOS SE HA CREADO CORRECTAMENTE")
 except:
@@ -61,17 +62,18 @@ connection.close()
 
 '''
  CREATE TABLE T_REQUISITOS (
-            ID int IDENTITY(1,1) PRIMARY KEY,
-            ID_REQ varchar(20),
-            DESC_REQ varchar(4000),
-            RESP varchar(1),
-            COMMENT varchar(4000),
-            VEHICULO varchar(50),
-            CLIENTE varchar(50),
-            FECHA_ACT varchar(20),
-            COMENT_INT varchar(4000),
-            VERS int,
-			PROYECTO_ORIGEN varchar(50),
-			FICHERO_ORIGEN varchar(100))
+        ID int IDENTITY(1,1) PRIMARY KEY,
+        ID_REQ varchar(20),
+        DESC_REQ varchar(4000),
+        RESP varchar(1),
+        COMMENT varchar(4000),
+        VEHICULO varchar(50),
+        CLIENTE varchar(50),
+        FECHA_ACT varchar(20),
+        COMENT_INT varchar(4000),
+        VERS int,
+        PROYECTO_ORIGEN varchar(50),
+        FICHERO_ORIGEN varchar(100),
+        ENTREGABLE_CBC varchar(20))
 
 '''

@@ -17,6 +17,33 @@ from pandas import ExcelWriter
 import pyodbc 
 import json
 
+
+def leer_configuracion(fichero_config):
+    with open(fichero_config, 'r') as archivo:
+        configuracion = json.load(archivo)
+    return configuracion
+
+PathName=os.path.dirname(__file__)
+fileConfig=PathName + "/config.json"
+
+configuracion=leer_configuracion(fileConfig)
+
+# Acceder a los datos
+direccion_bd = configuracion['database']['host']
+servidor=direccion_bd.replace("/","\\")
+database=configuracion['database']['database_name']
+username=configuracion['database']['username']
+tablename=configuracion['database']['table_name']
+password='Prueb@sManuel23'
+# Cadena de conexión
+connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={database};UID={username};PWD={password}'
+
+
+
+
+
+
+
 dftemp = pd.DataFrame({'Id_Req': [],
                    'Desc_Req': [],
                    'ID_Req_BBDD': [],
@@ -25,19 +52,27 @@ dftemp = pd.DataFrame({'Id_Req': [],
                    'Resp_BBDD':[],
                    'Coment_BBDD':[],
                    'Nueva_Respuesta':[],
-                   'Nuevos_comentarios':[]})
+                   'Nuevos_Comentarios':[],
+                   'Proyecto_Origen':[],
+                   'Fichero_Origen':[]})
 
 def InsertClause(clausula):
     """InsertClause INTENTA INSERTAR UNA CLÁUSULA EN BBDD.
     ANTES DE INSERTARLA DEBE COMBROBAR SI LA CLÁUSULA YA EXISTE LLAMANDO A LA FUNCIÓN CHECKCLAUSE"""
     global dftemp
-    PathName=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
-    #PathName="C:/Users/mcuberos/Desktop/AppGestorRequisitos_old/Python/FICHEROS"
-    miConexion=sqlite3.connect(PathName + "/BBDD_CBCs")
-    #miConexion=sqlite3.connect("C:/Users/mcuberos/OneDrive - Internacional Hispacold/Documentos/git/ProyGestorRequisitos/Python/BBDD_CBCs")
-    miCursor=miConexion.cursor()
-    miCursor.execute("SELECT * FROM REQUISITOS")
-    listadoRequisitos=miCursor.fetchall()
+    global tipo_vehiculo
+    global fichero_origen
+    global proy_origen
+    global entregable_cbc
+    global connection_string
+  
+    # Establecer la conexión
+    connection = pyodbc.connect(connection_string)
+
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT * FROM T_REQUISITOS")
+    listadoRequisitos=cursor.fetchall()
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
@@ -45,21 +80,21 @@ def InsertClause(clausula):
             if clausula[2]==requisito[3] and clausula[3]==requisito[4]:
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
             else:
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"",""], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11]], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
             accuracy=CheckClause(clausula[1],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
             if accuracy>95:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"",""], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11]], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
 
         
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
-        miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL, ?, ?, ?, ?,'TRANVÍA','CAF',NULL,NULL,1)",(clausula[4],clausula[1],clausula[2],clausula[3]))
-        miConexion.commit()
+        cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF','24/07/2023',NULL,1,?,?,?)",(clausula[4],clausula[1],clausula[2],clausula[3],tipo_vehiculo,proy_origen,fichero_origen,entregable_cbc))
+        connection.commit()
     
     return dftemp
 
@@ -88,17 +123,13 @@ colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS
 colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...) ")
 colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
 colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
-nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements)")
+nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements) ")
 if nombre_hoja=="":
     nombre_hoja="Requirements"
-'''
-filaHeader="7"
-colClause="g"
-colResp="Q"
-colComments="r"
-colFamReq="a"
-colObjectType="d"
-'''
+tipo_vehiculo=input("INDIQUE EL TIPO DE VEHÍCULO DEL CBC (TRANVÍA, METRO, ...) ")
+proy_origen=input("INDIQUE EL NOMBRE DEL PROYECTO: ")
+fichero_origen=os.path.split(fileName)[1]
+entregable_cbc=input("INDIQUE EL TIPO DE EQUIPO AL QUE HACE REFERENCIA EL CBC (SALA, CABINA, GENERAL): ")
 
 df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_default_na=FALSE)
 #EL DATAFRAME CONSIDERA LOS "NA" COMO NaN, ASÍ QUE TRATO LOS NA DE LA COLUMNA RESPUESTA PARA QUE LOS GUARDE CORRECTAMENTE CON LA FUNCIÓN fillna
