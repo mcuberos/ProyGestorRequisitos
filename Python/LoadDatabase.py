@@ -16,6 +16,8 @@ from tkinter.filedialog import askopenfilename
 from pandas import ExcelWriter
 import pyodbc 
 import json
+from datetime import date
+
 
 
 def leer_configuracion(fichero_config):
@@ -39,10 +41,7 @@ password='Prueb@sManuel23'
 connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={database};UID={username};PWD={password}'
 
 
-
-
-
-
+fecha_actual_sql = date.today().strftime('%Y-%m-%d')
 
 dftemp = pd.DataFrame({'Id_Req': [],
                    'Desc_Req': [],
@@ -54,7 +53,11 @@ dftemp = pd.DataFrame({'Id_Req': [],
                    'Nueva_Respuesta':[],
                    'Nuevos_Comentarios':[],
                    'Proyecto_Origen':[],
-                   'Fichero_Origen':[]})
+                   'Fichero_Origen':[],
+                   'Nuevo_Proyecto':[],
+                   'Nuevo_Fichero':[],
+                   'Tipo_Vehiculo':[],
+                   'Tipo_Entregable':[]})
 
 def InsertClause(clausula):
     """InsertClause INTENTA INSERTAR UNA CLÁUSULA EN BBDD.
@@ -65,6 +68,7 @@ def InsertClause(clausula):
     global proy_origen
     global entregable_cbc
     global connection_string
+    global fecha_actual_sql
   
     # Establecer la conexión
     connection = pyodbc.connect(connection_string)
@@ -80,20 +84,20 @@ def InsertClause(clausula):
             if clausula[2]==requisito[3] and clausula[3]==requisito[4]:
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
             else:
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11]], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
             accuracy=CheckClause(clausula[1],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
             if accuracy>95:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11]], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
 
-        
+
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
-        cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF','24/07/2023',NULL,1,?,?,?)",(clausula[4],clausula[1],clausula[2],clausula[3],tipo_vehiculo,proy_origen,fichero_origen,entregable_cbc))
+        cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[4],clausula[1],clausula[2],clausula[3],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
         connection.commit()
     
     return dftemp
@@ -148,11 +152,11 @@ for kk in range(len(df)):
 
 
 if len(dftemp)>0:
-    Ruta=os.path.dirname(__file__) #busco la ruta donde se debe encontrar la bbdd
+    Ruta=os.path.dirname(fileName) #busco la ruta donde se debe encontrar la bbdd
     excelTemp=(Ruta + "/ExcelTemp.xlsx")
     
     writer = ExcelWriter(excelTemp)
-    dftemp.to_excel(writer, 'Requierements Temp', index=False)
+    dftemp.to_excel(writer, 'Requirements Temp', index=False)
     writer.close()
 
     messagebox.showinfo("EXCEL TEMPORAL CREADO","SE HA CREADO UN EXCEL TEMPORAL CON LAS CLÁUSULAS CON COINCIDENCIAS EN LA RUTA " + Ruta)   

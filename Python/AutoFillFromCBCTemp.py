@@ -43,7 +43,6 @@ if duplicates.any():
     print("HAY CLÁUSULAS REPETIDAS EN EL EXCEL TEMPORAL. SE DEBE CORREGIR PARA PODER EJECUTAR EL PROGRAMA")
     for kk in range(len(duplicated_values)):
         print("LA CLÁUSULA "+ duplicated_values[kk] +" SE ENCUENTRA DUPLICADA." )
-        input()
     sys.exit()
     
 
