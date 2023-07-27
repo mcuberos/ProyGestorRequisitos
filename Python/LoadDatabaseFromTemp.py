@@ -50,7 +50,7 @@ def InsertClauseFromTemp(clausula):
     cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[0],clausula[1],clausula[2],clausula[3],clausula[6],date.today().strftime('%Y-%m-%d'),clausula[4],clausula[5],clausula[7]))
     connection.commit()
 
-
+print("SELECCIONE EL FICHERO ExcelTemp A CARGAR")
 fileName=askopenfilename()
 df=pd.read_excel(fileName, sheet_name="Requirements Temp",keep_default_na=FALSE)
 

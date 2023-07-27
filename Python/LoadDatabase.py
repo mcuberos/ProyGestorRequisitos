@@ -14,6 +14,8 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.filedialog import askopenfilename 
 from pandas import ExcelWriter
+from openpyxl import load_workbook
+from openpyxl.styles import PatternFill, Font
 import pyodbc 
 import json
 from datetime import date
@@ -84,14 +86,14 @@ def InsertClause(clausula):
             if clausula[2]==requisito[3] and clausula[3]==requisito[4]:
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
             else:
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[2],clausula[3],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
             accuracy=CheckClause(clausula[1],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
             if accuracy>95:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],"","",requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[2],clausula[3],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
 
 
@@ -161,6 +163,28 @@ if len(dftemp)>0:
     writer = ExcelWriter(excelTemp)
     dftemp.to_excel(writer, 'Requirements Temp', index=False)
     writer.close()
+    #DOY FORMATO A COLUMNAS 
+    libro=load_workbook(excelTemp)
+    hoja=libro.active
+    columnas_a_formatear = ["H","I"]
+    fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+    for col in columnas_a_formatear:
+        for celda in hoja[col]:
+            celda.fill=fill
+    fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
+    font = Font(bold=True)
+    encabezado=hoja[1]
+    for celda in encabezado:
+        celda.fill=fillHeader
+        celda.font=font
+
+    
+    for i in range(len(hoja["A"])):
+        if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
+            hoja["A"+str(i+1)].fill=fill
+            hoja["A"+str(i+2)].fill=fill
+
+    libro.save(excelTemp)
 
     messagebox.showinfo("EXCEL TEMPORAL CREADO","SE HA CREADO UN EXCEL TEMPORAL CON LAS CLÁUSULAS CON COINCIDENCIAS EN LA RUTA " + Ruta)   
 
