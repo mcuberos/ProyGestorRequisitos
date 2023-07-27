@@ -39,7 +39,7 @@ try:
         CREATE TABLE T_REQUISITOS (
         ID int IDENTITY(1,1) PRIMARY KEY,
         ID_REQ varchar(20),
-        DESC_REQ varchar(4000),
+        DESC_REQ varchar(10000),
         RESP varchar(2),
         COMMENT varchar(4000),
         VEHICULO varchar(50),
