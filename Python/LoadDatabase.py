@@ -97,9 +97,12 @@ def InsertClause(clausula):
 
     if ExisteClausula==FALSE:
         #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
-        cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[4],clausula[1],clausula[2],clausula[3],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
-        connection.commit()
-    
+        try:
+            cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[4],clausula[1],clausula[2],clausula[3],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
+            connection.commit()
+        except Exception as e:
+            messagebox.showinfo("¡ATENCIÓN!","NO SE HA PODIDO CREAR EL REGISTRO EN BASE DE DATOS: " + str(e))
+
     return dftemp
 
 
@@ -123,10 +126,10 @@ def CheckClause(newClause,requirement):
 
 fileName=askopenfilename()
 filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC ")
+colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
 colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...) ") #para convertir la columna (letra) a número: ord(colClause.lower())-96
 colResp=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS RESPUESTAS A LOS REQUISITOS - C/NC/NA (A,B,C,D,...) ")
 colComments=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS COMENTARIOS (A,B,C,D,...) ")
-colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
 nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements) ")
 if nombre_hoja=="":
     nombre_hoja="Requirements"
