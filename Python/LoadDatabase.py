@@ -41,25 +41,30 @@ tablename=configuracion['database']['table_name']
 password='Prueb@sManuel23'
 # Cadena de conexión
 connection_string = f'DRIVER={{SQL Server}};SERVER={servidor};DATABASE={database};UID={username};PWD={password}'
-
+connection = pyodbc.connect(connection_string)
+cursor = connection.cursor()
+cursor.execute("SELECT * FROM T_REQUISITOS")
+listadoRequisitos=cursor.fetchall()
 
 fecha_actual_sql = date.today().strftime('%Y-%m-%d')
 
 dftemp = pd.DataFrame({'Id_Req': [],
                    'Desc_Req': [],
-                   'ID_Req_BBDD': [],
-                   'Descr_Req_BBDD':[],
-                   '%Coincidencia':[],
-                   'Resp_BBDD':[],
-                   'Coment_BBDD':[],
                    'Nueva_Respuesta':[],
                    'Nuevos_Comentarios':[],
-                   'Proyecto_Origen':[],
-                   'Fichero_Origen':[],
                    'Nuevo_Proyecto':[],
                    'Nuevo_Fichero':[],
                    'Tipo_Vehiculo':[],
-                   'Tipo_Entregable':[]})
+                   'Entregable_CBC':[],
+                   '%Coincidencia':[],
+                   'ID_Req_BBDD': [],
+                   'Descr_Req_BBDD':[],
+                   'Resp_BBDD':[],
+                   'Coment_BBDD':[],
+                   'Proyecto_Origen':[],
+                   'Fichero_Origen':[],
+                   'Vehiculo_BBDD':[],
+                   'Entregable_CBC_BBDD':[]})
 
 def InsertClause(clausula):
     """InsertClause INTENTA INSERTAR UNA CLÁUSULA EN BBDD.
@@ -71,36 +76,38 @@ def InsertClause(clausula):
     global entregable_cbc
     global connection_string
     global fecha_actual_sql
-  
-    # Establecer la conexión
+    global listadoRequisitos
+    
+    '''
+    # Si quiero comprobar si en el mismo fichero que quiero subir a bbdd hay clausulas repetidas, establezco una nueva conexión a bbdd para cada clausula
     connection = pyodbc.connect(connection_string)
 
     cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM T_REQUISITOS")
     listadoRequisitos=cursor.fetchall()
+    '''
     ExisteClausula=FALSE
 
     for requisito in listadoRequisitos:
-        if clausula[4]==requisito[1]:
-            if clausula[2]==requisito[3] and clausula[3]==requisito[4]:
+        if clausula[1]==requisito[1]:
+            if clausula[3]==requisito[3] and clausula[4]==requisito[4]:
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
             else:
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[2],clausula[3],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[3],clausula[4],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
-            accuracy=CheckClause(clausula[1],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
+            accuracy=CheckClause(clausula[2],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
             if accuracy>95:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
-                nueva_fila = pd.Series([clausula[4], clausula[1], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[2],clausula[3],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[3],clausula[4],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
 
 
     if ExisteClausula==FALSE:
-        #miCursor.execute("INSERT INTO REQUISITOS VALUES (NULL,'FAM_REQ','DESCRICPION DEL REQUISITO','C','COMENTARIO DE PRUEBA','TRANVIA','CAF',NULL,'COMENTARIO INTERNO',1)")#ejemplo
         try:
-            cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[4],clausula[1],clausula[2],clausula[3],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
+            cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[1],clausula[2],clausula[3],clausula[4],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
             connection.commit()
         except Exception as e:
             messagebox.showinfo("¡ATENCIÓN!","NO SE HA PODIDO CREAR EL REGISTRO EN BASE DE DATOS: " + str(e))
@@ -125,7 +132,7 @@ def CheckClause(newClause,requirement):
                     
     return accuracy
 
-
+print("SELECCIONE EL CBC QUE DESEA CARGAR A BASE DE DATOS")
 fileName=askopenfilename()
 filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC ")
 colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
@@ -152,7 +159,7 @@ df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_
 for kk in range(len(df)):
     if (df.iloc[kk][(ord(colResp.lower())-97)]!="" and len(df.iloc[kk][(ord(colClause.lower())-97)])>5):
         #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
-        clausula=(kk,df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)],df.iloc[kk][(ord(colIdReq.lower())-97)])
+        clausula=(kk,df.iloc[kk][(ord(colIdReq.lower())-97)],df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)])
         InsertClause(clausula)
 
 
@@ -166,11 +173,23 @@ if len(dftemp)>0:
     #DOY FORMATO A COLUMNAS 
     libro=load_workbook(excelTemp)
     hoja=libro.active
-    columnas_a_formatear = ["H","I"]
-    fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
+
+    columnas_a_formatear = ["A","H"]
+    fill = PatternFill(start_color="DCE6F1", end_color="DCE6F1", fill_type="solid")
     for col in columnas_a_formatear:
         for celda in hoja[col]:
             celda.fill=fill
+    
+    fill = PatternFill(start_color="EBF1DE", end_color="EBF1DE", fill_type="solid")
+    for celda in hoja["I"]:
+        celda.fill=fill
+
+    columnas_a_formatear = ["J","Q"]
+    fill = PatternFill(start_color="F2DCDB", end_color="F2DCDB", fill_type="solid")
+    for col in columnas_a_formatear:
+        for celda in hoja[col]:
+            celda.fill=fill
+
     fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
     font = Font(bold=True)
     encabezado=hoja[1]
@@ -178,11 +197,29 @@ if len(dftemp)>0:
         celda.fill=fillHeader
         celda.font=font
 
-    
+    filas_borrar=[]
+    #resalto las cláusulas que aparezcan repetidas
+    fill = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid")
     for i in range(len(hoja["A"])):
         if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
-            hoja["A"+str(i+1)].fill=fill
-            hoja["A"+str(i+2)].fill=fill
+            if hoja["G"+str(i+1)].value==hoja["P"+str(i+1)].value and  hoja["H"+str(i+1)].value==hoja["Q"+str(i+1)].value: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
+                filas_borrar.add[i+2]
+            elif hoja["G"+str(i+2)].value==hoja["P"+str(i+2)].value and  hoja["H"+str(i+2)].value==hoja["Q"+str(i+2)].value: #y viceversa
+                filas_borrar.add[i+1]
+            else:
+                hoja["A"+str(i+1)].fill=fill
+                hoja["A"+str(i+2)].fill=fill
+
+        if hoja["C"+str(i+1)].value!=hoja["L"+str(i+1)].value:
+            hoja["C"+str(i+1)].fill=fill
+            hoja["D"+str(i+1)].fill=fill
+
+        if hoja["D"+str(i+1)].value!=hoja["M"+str(i+1)].value:
+            hoja["L"+str(i+1)].fill=fill
+            hoja["M"+str(i+1)].fill=fill
+
+    for f in filas_borrar[::-1]:
+        hoja.delete_rows(f)
 
     libro.save(excelTemp)
 

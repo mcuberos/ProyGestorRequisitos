@@ -57,7 +57,8 @@ df=pd.read_excel(fileName, sheet_name="Requirements Temp",keep_default_na=FALSE)
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause, OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS 
 for kk in range(len(df)):
-        clausula=(df.iloc[kk][0],df.iloc[kk][1],df.iloc[kk][7],df.iloc[kk][8],df.iloc[kk][11],df.iloc[kk][12],df.iloc[kk][13],df.iloc[kk][14])
+        #clausula=(id_req,desc_req,resp,comentarios,proyecto,fichero,vehiculo,entregable)
+        clausula=(df.iloc[kk][0],df.iloc[kk][1],df.iloc[kk][2],df.iloc[kk][3],df.iloc[kk][4],df.iloc[kk][5],df.iloc[kk][6],df.iloc[kk][7])
         InsertClauseFromTemp(clausula)
 
 
