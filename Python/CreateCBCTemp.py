@@ -131,6 +131,12 @@ filaHeader=input("INDIQUE LA FILA DONDE SE ENCUENTRA LA CABECERA DEL CBC ")
 colIdReq=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LOS IDs DEL REQUISITO (A,B,C,D,...) ")
 colClause=input("INDIQUE LA COLUMNA DONDE SE ENCUENTRAN LAS DESCRIPCIONES DE LOS REQUISITOS (A,B,C,D,...) ") #para convertir la columna (letra) a número: ord(colClause.lower())-96
 nombre_hoja=input("INDIQUE EL NOMBRE DE LA HOJA DONDE SE ENCUENTRAN LOS REQUISITOS (POR DEFECTO, Requirements)")
+tipo_vehiculo=input("INDIQUE EL TIPO DE VEHÍCULO DEL CBC (TRANVÍA, METRO, ...) ")
+entregable_cbc=input("INDIQUE EL TIPO DE EQUIPO AL QUE HACE REFERENCIA EL CBC (SALA, CABINA, GENERAL): ")
+#proy_origen=input("INDIQUE EL NOMBRE DEL PROYECTO: ")
+#fichero_origen=os.path.split(fileName)[1]
+
+
 #GENERO EL DATAFRAME OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS QUE TIENEN EL FONDO GRIS 
 # PRIMERO, GUARDO EN UNA TUPLA TODAS LAS FILAS DE TÍTULOS  
 book=load_workbook(fileName)
@@ -183,11 +189,20 @@ if len(dftemp)>0:
         celda.fill=fillHeader
         celda.font=font
 
-    
+    filas_borrar=[]
+
     for i in range(len(hoja["A"])):
-        if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
+
+        if hoja["L"+str(i+1)].value==tipo_vehiculo and  hoja["M"+str(i+1)].value==entregable_cbc: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
+            filas_borrar.add[i+2]
+        elif hoja["L"+str(i+2)].value==tipo_vehiculo.value and  hoja["M"+str(i+2)].value==entregable_cbc: #y viceversa
+            filas_borrar.add[i+1]
+        else:
             hoja["A"+str(i+1)].fill=fill
             hoja["A"+str(i+2)].fill=fill
+
+    for f in filas_borrar[::-1]:
+        hoja.delete_rows(f)
 
     libro.save(excelTemp)
 

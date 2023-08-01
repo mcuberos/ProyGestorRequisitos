@@ -92,16 +92,16 @@ def InsertClause(clausula):
     for requisito in listadoRequisitos:
         if clausula[1]==requisito[1]:
             if clausula[3]==requisito[3] and clausula[4]==requisito[4]:
-                print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1])
+                print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[1]," ya existe en bbdd con el ID_REQ:",requisito[1])
             else:
-                nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[3],clausula[4],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[1], clausula[2],clausula[3],clausula[4],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc,100,requisito[1],requisito[2],requisito[3],requisito[4],requisito[10],requisito[11],requisito[5],requisito[12]], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
         else:
             accuracy=CheckClause(clausula[2],requisito[2]) #La salida de la función debe ser un % de coincidencia (accuracy) entre los dos requisitos. if accuracy<60%, insert requisito en bbdd
-            if accuracy>95:
+            if accuracy>85:
                 ExisteClausula=TRUE
                 print("La cláusula situada en la fila", clausula[0]+1  ,"con identificador ",clausula[4]," ya existe en bbdd con el id ",requisito[0],"-ID_REQ:",requisito[1], "con un porcentaje de coincidencia del ",accuracy," por ciento")
-                nueva_fila = pd.Series([clausula[1], clausula[2], requisito[1],requisito[2],accuracy,requisito[3],requisito[4],clausula[3],clausula[4],requisito[10],requisito[11],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc], index=dftemp.columns)
+                nueva_fila = pd.Series([clausula[1], clausula[2],clausula[3],clausula[4],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc,accuracy,requisito[1],requisito[2],requisito[3],requisito[4],requisito[10],requisito[11],requisito[5],requisito[12]], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
 
 
@@ -173,8 +173,8 @@ if len(dftemp)>0:
     #DOY FORMATO A COLUMNAS 
     libro=load_workbook(excelTemp)
     hoja=libro.active
-
-    columnas_a_formatear = ["A","H"]
+    print("Dando formato a excel temp...")
+    columnas_a_formatear = ["A","B","C","D","E","F","G","H"]
     fill = PatternFill(start_color="DCE6F1", end_color="DCE6F1", fill_type="solid")
     for col in columnas_a_formatear:
         for celda in hoja[col]:
@@ -184,18 +184,12 @@ if len(dftemp)>0:
     for celda in hoja["I"]:
         celda.fill=fill
 
-    columnas_a_formatear = ["J","Q"]
+    columnas_a_formatear = ["J","K","L","M","N","O","P","Q"]
     fill = PatternFill(start_color="F2DCDB", end_color="F2DCDB", fill_type="solid")
     for col in columnas_a_formatear:
         for celda in hoja[col]:
             celda.fill=fill
 
-    fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
-    font = Font(bold=True)
-    encabezado=hoja[1]
-    for celda in encabezado:
-        celda.fill=fillHeader
-        celda.font=font
 
     filas_borrar=[]
     #resalto las cláusulas que aparezcan repetidas
@@ -212,11 +206,18 @@ if len(dftemp)>0:
 
         if hoja["C"+str(i+1)].value!=hoja["L"+str(i+1)].value:
             hoja["C"+str(i+1)].fill=fill
-            hoja["D"+str(i+1)].fill=fill
+            hoja["L"+str(i+1)].fill=fill
 
         if hoja["D"+str(i+1)].value!=hoja["M"+str(i+1)].value:
-            hoja["L"+str(i+1)].fill=fill
+            hoja["D"+str(i+1)].fill=fill
             hoja["M"+str(i+1)].fill=fill
+
+    fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
+    font = Font(bold=True)
+    encabezado=hoja[1]
+    for celda in encabezado:
+        celda.fill=fillHeader
+        celda.font=font
 
     for f in filas_borrar[::-1]:
         hoja.delete_rows(f)
