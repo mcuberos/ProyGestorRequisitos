@@ -50,9 +50,12 @@ libro=load_workbook(filename=fileCBC)
 hoja=libro[nombre_hoja]
 df_cbc=pd.read_excel(fileCBC, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_default_na=FALSE)
 
-#RECORRO EL DATAFRAME DEL EXCEL TEMPORAL. SI ENCUENTRO UNA CLÁUSULA REPETIDA HAY QUE ALERTAR AL USUARIO 
+
 for kk in range(len(df)):
         #defino la variable clausula como una tupla que contiene: id_requisito, descripción de la clausula, la respuesta, comentarios
+        if kk%10==0:
+            print(str(kk) + "/" + str(len(df)))
+
         clausula=(df.iloc[kk][0],df.iloc[kk][1],df.iloc[kk][7],df.iloc[kk][8])
 
         for fila in range(len(df_cbc)):
@@ -66,4 +69,4 @@ for kk in range(len(df)):
 libro.save(fileCBC)       
 
 
-messagebox.showinfo("FIN PROCESO","EJECUCIÓN FINALIZADA CON ÉXITO")
+messagebox.showinfo("FIN PROCESO","SE HA AUTORRELLENADO EL CBC.")
