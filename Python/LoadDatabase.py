@@ -197,9 +197,9 @@ if len(dftemp)>0:
     for i in range(len(hoja["A"])):
         if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
             if hoja["G"+str(i+1)].value==hoja["P"+str(i+1)].value and  hoja["H"+str(i+1)].value==hoja["Q"+str(i+1)].value: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
-                filas_borrar.add[i+2]
+                filas_borrar.append(i+2)
             elif hoja["G"+str(i+2)].value==hoja["P"+str(i+2)].value and  hoja["H"+str(i+2)].value==hoja["Q"+str(i+2)].value: #y viceversa
-                filas_borrar.add[i+1]
+                filas_borrar.append(i+1)
             else:
                 hoja["A"+str(i+1)].fill=fill
                 hoja["A"+str(i+2)].fill=fill

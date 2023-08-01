@@ -182,27 +182,29 @@ if len(dftemp)>0:
     for col in columnas_a_formatear:
         for celda in hoja[col]:
             celda.fill=fill
+
+
+    filas_borrar=[]
+
+    for i in range(len(hoja["A"])):
+        if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
+            if hoja["L"+str(i+1)].value==tipo_vehiculo and hoja["M"+str(i+1)].value==entregable_cbc: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
+                filas_borrar.append(i+2)
+            elif hoja["L"+str(i+2)].value==tipo_vehiculo and hoja["M"+str(i+2)].value==entregable_cbc: #y viceversa
+                filas_borrar.append(i+1)
+            else:
+                hoja["A"+str(i+1)].fill=fill
+                hoja["A"+str(i+2)].fill=fill
+
+    for f in filas_borrar[::-1]:
+        hoja.delete_rows(f)
+
     fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
     font = Font(bold=True)
     encabezado=hoja[1]
     for celda in encabezado:
         celda.fill=fillHeader
         celda.font=font
-
-    filas_borrar=[]
-
-    for i in range(len(hoja["A"])):
-
-        if hoja["L"+str(i+1)].value==tipo_vehiculo and  hoja["M"+str(i+1)].value==entregable_cbc: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
-            filas_borrar.add[i+2]
-        elif hoja["L"+str(i+2)].value==tipo_vehiculo.value and  hoja["M"+str(i+2)].value==entregable_cbc: #y viceversa
-            filas_borrar.add[i+1]
-        else:
-            hoja["A"+str(i+1)].fill=fill
-            hoja["A"+str(i+2)].fill=fill
-
-    for f in filas_borrar[::-1]:
-        hoja.delete_rows(f)
 
     libro.save(excelTemp)
 
