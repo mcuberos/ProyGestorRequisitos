@@ -40,7 +40,7 @@ def leer_configuracion(fichero_config):
     return configuracion
 
 PathName=os.path.dirname(__file__)
-fileConfig=PathName + "/config.json"
+fileConfig="C:/AppGestorRequisitos/config.json"
 
 configuracion=leer_configuracion(fileConfig)
 
@@ -191,15 +191,6 @@ if len(dftemp)>0:
     filas_borrar=[]
 
     for i in range(len(hoja["A"])):
-        if hoja["A"+str(i+1)].value=="Q94-EF-RS-248":
-            print(hoja["A"+str(i+1)].value)
-            print(hoja["A"+str(i+2)].value)
-            print(hoja["L"+str(i+1)].value)
-            print(hoja["L"+str(i+2)].value)
-            print(tipo_vehiculo)
-            print(hoja["M"+str(i+1)].value)
-            print(hoja["M"+str(i+2)].value)
-            print(entregable_cbc)
         if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
             k=2
             while hoja["A"+str(i+k)].value==hoja["A"+str(i+1)].value:
@@ -214,20 +205,9 @@ if len(dftemp)>0:
                     hoja["A"+str(i+k)].fill=fill
                 k=k+1
             
-            '''
-            if hoja["L"+str(i+1)].value==tipo_vehiculo and hoja["M"+str(i+1)].value==entregable_cbc: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
-                filas_borrar.append(i+2)
-                print(filas_borrar)
-            elif hoja["L"+str(i+2)].value==tipo_vehiculo and hoja["M"+str(i+2)].value==entregable_cbc: #y viceversa
-                filas_borrar.append(i+1)
-                print(filas_borrar)
-            else:
-                hoja["A"+str(i+1)].fill=fill
-                hoja["A"+str(i+2)].fill=fill
-            '''
     for f in filas_borrar[::-1]:
         print(f)
-   #     hoja.delete_rows(f)
+        hoja.delete_rows(f)
 
 
     fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")

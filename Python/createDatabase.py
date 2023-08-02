@@ -12,7 +12,7 @@ def leer_configuracion(fichero_config):
     return configuracion
 
 PathName=os.path.dirname(__file__)
-fileConfig=PathName + "/config.json"
+fileConfig="C:/AppGestorRequisitos/config.json"
 
 configuracion=leer_configuracion(fileConfig)
 
