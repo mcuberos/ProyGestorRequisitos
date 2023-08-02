@@ -5,7 +5,6 @@
 #Ejemplo: python LoadDatabase.py 'C:/Users/mcuberos/Desktop/AppGestorRequisitos_old/Python/D0000016800_EEFAE SALOON HVAC P2_Ed-HC_230517.xlsx' '7' 'G'''
 
 import os
-import sqlite3
 import re
 import pandas as pd
 from tkinter import messagebox
@@ -46,6 +45,7 @@ fileConfig=PathName + "/config.json"
 configuracion=leer_configuracion(fileConfig)
 
 # Acceder a los datos
+print("Creando conexión con la base de datos...")
 direccion_bd = configuracion['database']['host']
 servidor=direccion_bd.replace("/","\\")
 database=configuracion['database']['database_name']
@@ -139,6 +139,7 @@ entregable_cbc=input("INDIQUE EL TIPO DE EQUIPO AL QUE HACE REFERENCIA EL CBC (S
 
 #GENERO EL DATAFRAME OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS QUE TIENEN EL FONDO GRIS 
 # PRIMERO, GUARDO EN UNA TUPLA TODAS LAS FILAS DE TÍTULOS  
+print("Generando dataframe con todas las cláusulas del CbC...")
 book=load_workbook(fileName)
 if nombre_hoja=="":
     nombre_hoja="Requirements"
@@ -150,6 +151,7 @@ filas_titulos=[]
 #TENGO QUE MODIFICAR ALGO EN EL WHILE, PORQUE CUANDO ENCUENTRA UNA LÍNEA EN BLANCO DEJA DE RECORRERLO, Y PUEDE HABERLA. tengo que jugar con el tamaño del df global, contando titulos
 df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_default_na=FALSE)
 
+print("Descartando filas que hacen referencia a títulos de apartados en el CbC......")
 for aux in range(len(df)):
     if (celda.fill.fgColor.rgb!="00000000" and celda.fill.fgColor.type!="theme") or celda.value==None: #busco las celdas que tengan relleno distinto de vacío y de blanco
         filas_titulos.append(fila-1) #guardo fila-1 porque el dataframe trabaja con la fila 0
@@ -159,6 +161,7 @@ for aux in range(len(df)):
 df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,skiprows=filas_titulos,keep_default_na=FALSE)
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause 
+print("Buscando respuestas en cláusulas similares de la base de datos...")
 for kk in range(len(df)):
     if kk%10==0:
         print(str(kk) + "/" + str(len(df)))
@@ -169,6 +172,7 @@ for kk in range(len(df)):
 
 
 if len(dftemp)>0:
+    print("Creando excel CbC Temporal con las respuestas encontradas...")
     Ruta=os.path.dirname(fileName) #busco la ruta del CBC para crear ahí el cbctemp
     excelTemp=(Ruta + "/CBCTemporal.xlsx")
     writer = pd.ExcelWriter(excelTemp,engine='xlsxwriter')
@@ -187,17 +191,44 @@ if len(dftemp)>0:
     filas_borrar=[]
 
     for i in range(len(hoja["A"])):
+        if hoja["A"+str(i+1)].value=="Q94-EF-RS-248":
+            print(hoja["A"+str(i+1)].value)
+            print(hoja["A"+str(i+2)].value)
+            print(hoja["L"+str(i+1)].value)
+            print(hoja["L"+str(i+2)].value)
+            print(tipo_vehiculo)
+            print(hoja["M"+str(i+1)].value)
+            print(hoja["M"+str(i+2)].value)
+            print(entregable_cbc)
         if hoja["A"+str(i+1)].value==hoja["A"+str(i+2)].value:
+            k=2
+            while hoja["A"+str(i+k)].value==hoja["A"+str(i+1)].value:
+                if hoja["L"+str(i+1)].value==tipo_vehiculo and hoja["M"+str(i+1)].value==entregable_cbc and (k+i) not in filas_borrar: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
+                    filas_borrar.append(i+k)
+                    print(filas_borrar)
+                elif hoja["L"+str(i+k)].value==tipo_vehiculo and hoja["M"+str(i+k)].value==entregable_cbc and (i+1) not in filas_borrar: #y viceversa
+                    filas_borrar.append(i+1)
+                    print(filas_borrar)
+                else:
+                    hoja["A"+str(i+1)].fill=fill
+                    hoja["A"+str(i+k)].fill=fill
+                k=k+1
+            
+            '''
             if hoja["L"+str(i+1)].value==tipo_vehiculo and hoja["M"+str(i+1)].value==entregable_cbc: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
                 filas_borrar.append(i+2)
+                print(filas_borrar)
             elif hoja["L"+str(i+2)].value==tipo_vehiculo and hoja["M"+str(i+2)].value==entregable_cbc: #y viceversa
                 filas_borrar.append(i+1)
+                print(filas_borrar)
             else:
                 hoja["A"+str(i+1)].fill=fill
                 hoja["A"+str(i+2)].fill=fill
-
+            '''
     for f in filas_borrar[::-1]:
-        hoja.delete_rows(f)
+        print(f)
+   #     hoja.delete_rows(f)
+
 
     fillHeader = PatternFill(start_color="EF9191", end_color="EF9191", fill_type="solid")
     font = Font(bold=True)
