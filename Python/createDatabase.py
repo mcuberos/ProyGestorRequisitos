@@ -14,7 +14,7 @@ def leer_configuracion(fichero_config):
 PathName=os.path.dirname(__file__)
 fileConfig="C:/AppGestorRequisitos/config.json"
 
-configuracion=leer_configuracion(fileConfig)
+configuracion=leer_configuracion(fileConfig)    
 
 # Acceder a los datos
 direccion_bd = configuracion['database']['host']
