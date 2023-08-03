@@ -1,9 +1,6 @@
 ######## FUNCIÓN PARA CARGAR UN CBC Y AUTORELLENAR LAS CLÁUSULAS EN BASE A LO QUE HAYA INFORMADO EN EL CBC TEMPORAL QUE SE HAYA GENERADO PREVIAMENTE
 
 
-import os
-import sqlite3
-import re
 import pandas as pd
 from tkinter import messagebox
 import sys

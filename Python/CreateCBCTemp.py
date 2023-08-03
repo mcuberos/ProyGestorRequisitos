@@ -39,8 +39,14 @@ def leer_configuracion(fichero_config):
         configuracion = json.load(archivo)
     return configuracion
 
-PathName=os.path.dirname(__file__)
-fileConfig="C:/AppGestorRequisitos/config.json"
+if getattr(sys,'frozen',False):
+    PathName=os.path.dirname(sys.executable)
+else:
+    PathName=os.path.dirname(os.path.abspath(__file__))
+
+#PathName=os.path.dirname(__file__)
+fileConfig = PathName + '/config.json'
+#fileConfig="C:/AppGestorRequisitos/config.json"
 
 configuracion=leer_configuracion(fileConfig)
 
@@ -196,10 +202,8 @@ if len(dftemp)>0:
             while hoja["A"+str(i+k)].value==hoja["A"+str(i+1)].value:
                 if hoja["L"+str(i+1)].value==tipo_vehiculo and hoja["M"+str(i+1)].value==entregable_cbc and (k+i) not in filas_borrar: #si en la primera fila coincide tipo veh y entregable, borro la otra fila
                     filas_borrar.append(i+k)
-                    print(filas_borrar)
                 elif hoja["L"+str(i+k)].value==tipo_vehiculo and hoja["M"+str(i+k)].value==entregable_cbc and (i+1) not in filas_borrar: #y viceversa
                     filas_borrar.append(i+1)
-                    print(filas_borrar)
                 else:
                     hoja["A"+str(i+1)].fill=fill
                     hoja["A"+str(i+k)].fill=fill

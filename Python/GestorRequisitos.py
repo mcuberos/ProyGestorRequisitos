@@ -1,5 +1,6 @@
 from tkinter import messagebox
 import getpass
+import os
 
 action=input("Seleccione una opción (inserte solo el número): \n1. Cargar un CBC a la Base de Datos (SOLO ADMIN). \n2. Cargar un fichero temporal a la base de datos (SOLO ADMIN). \n3. Cargar un CBC para generar un excel temporal con la propuesta de autorrellenado. \n4. Cargar un excel temporal para autorellenar un CbC \n")
 '''

@@ -1,9 +1,9 @@
 import os
-import sqlite3
 from tkinter import messagebox
 from tkinter import *
 import pyodbc 
 import json
+import sys
 
 
 def leer_configuracion(fichero_config):
@@ -11,8 +11,14 @@ def leer_configuracion(fichero_config):
         configuracion = json.load(archivo)
     return configuracion
 
-PathName=os.path.dirname(__file__)
-fileConfig="C:/AppGestorRequisitos/config.json"
+if getattr(sys,'frozen',False):
+    PathName=os.path.dirname(sys.executable)
+else:
+    PathName=os.path.dirname(os.path.abspath(__file__))
+
+#PathName=os.path.dirname(__file__)
+fileConfig = PathName + '/config.json'
+#fileConfig="C:/AppGestorRequisitos/config.json"
 
 configuracion=leer_configuracion(fileConfig)    
 

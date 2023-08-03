@@ -5,8 +5,6 @@ LA FUNCIÓN DEBE RECORRER DICHO EXCEL E INSERTAR EN BASE DE DATOS TODAS LAS CLÁ
 #Ejemplo: python LoadDatabase.py 'C:/Users/mcuberos/Desktop/AppGestorRequisitos_old/Python/D0000016800_EEFAE SALOON HVAC P2_Ed-HC_230517.xlsx' '7' 'G'''
 
 import os
-import sqlite3
-import re
 import pandas as pd
 from tkinter import messagebox
 import sys
@@ -24,8 +22,14 @@ def leer_configuracion(fichero_config):
         configuracion = json.load(archivo)
     return configuracion
 
-PathName=os.path.dirname(__file__)
-fileConfig="C:/AppGestorRequisitos/config.json"
+if getattr(sys,'frozen',False):
+    PathName=os.path.dirname(sys.executable)
+else:
+    PathName=os.path.dirname(os.path.abspath(__file__))
+
+#PathName=os.path.dirname(__file__)
+fileConfig = PathName + '/config.json'
+#fileConfig="C:/AppGestorRequisitos/config.json"
 
 configuracion=leer_configuracion(fileConfig)
 

@@ -1,0 +1,8 @@
+{
+  "database": {
+    "host": "neptuno.hispacold.com",
+    "username": "saRequisitos",
+    "database_name": "Requisitos",
+	"table_name": "T_REQUISITOS"
+	}
+}
