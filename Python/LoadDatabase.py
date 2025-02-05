@@ -93,7 +93,7 @@ def InsertClause(clausula):
     listadoRequisitos=cursor.fetchall()
     '''
     ExisteClausula=FALSE
-
+    
     for requisito in listadoRequisitos:
         if clausula[1]==requisito[1]:
             if clausula[3]==requisito[3] and clausula[4]==requisito[4]:
@@ -109,10 +109,10 @@ def InsertClause(clausula):
                 nueva_fila = pd.Series([clausula[1], clausula[2],clausula[3],clausula[4],proy_origen,fichero_origen,tipo_vehiculo,entregable_cbc,accuracy,requisito[1],requisito[2],requisito[3],requisito[4],requisito[10],requisito[11],requisito[5],requisito[12]], index=dftemp.columns)
                 dftemp = dftemp._append(nueva_fila, ignore_index=True)
 
-
     if ExisteClausula==FALSE:
         try:
-            cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[1],clausula[2],clausula[3],clausula[4],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
+   #         cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(clausula[1],clausula[2],clausula[3],clausula[4],tipo_vehiculo,fecha_actual_sql,proy_origen,fichero_origen,entregable_cbc))
+            cursor.execute("INSERT INTO T_REQUISITOS VALUES (?, ?, ?, ?,?,'CAF',?,NULL,1,?,?,?)",(str(clausula[1]),str(clausula[2]),str(clausula[3]), str(clausula[4]),str(tipo_vehiculo), str(fecha_actual_sql), str(proy_origen),str(fichero_origen), str(entregable_cbc)))
             connection.commit()
         except Exception as e:
             messagebox.showinfo("¡ATENCIÓN!","NO SE HA PODIDO CREAR EL REGISTRO EN BASE DE DATOS: " + str(e))
@@ -162,6 +162,10 @@ df=pd.read_excel(fileName, sheet_name=nombre_hoja,header=int(filaHeader)-1,keep_
 
 #RECORRO EL DATAFRAME EN LA COLUMNA colClause, OMITIENDO LAS FILAS QUE SE CORRESPONDEN A TÍTULOS 
 for kk in range(len(df)):
+    #print(f"kk: {kk}, colResp: {colResp}, colClause: {colClause}")
+    #print(f"colResp index: {ord(colResp.lower()) - 97}, colClause index: {ord(colClause.lower()) - 97}")
+    #print(f"DataFrame shape: {df.shape}")
+    #print(df.head())  # Muestra las primeras filas del DataFrame
     if (df.iloc[kk][(ord(colResp.lower())-97)]!="" and len(df.iloc[kk][(ord(colClause.lower())-97)])>5):
         #defino la variable clausula como una tupla que contiene la descripción de la clausula, la respuesta, comentarios y req. familia
         clausula=(kk,df.iloc[kk][(ord(colIdReq.lower())-97)],df.iloc[kk][(ord(colClause.lower())-97)],df.iloc[kk][(ord(colResp.lower())-97)],df.iloc[kk][(ord(colComments.lower())-97)])
